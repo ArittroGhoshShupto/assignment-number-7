@@ -1,27 +1,37 @@
 const BASE =
   process.env.NEXT_PUBLIC_BASE_URL ||
-  "https://api.api-store.workers.dev/api/bazardor";
+  "https://openapi.programming-hero.com/api/bazardor";
 
-// দাম প্রতি ৬০ সেকেন্ডে refresh হবে (instant navigation + কম API request)
 async function get(path) {
   const res = await fetch(`${BASE}${path}`, { next: { revalidate: 60 } });
   if (!res.ok) throw new Error(`API ${res.status} on ${path}`);
   return res.json();
 }
 
-// /products  (category দিলে category field দিয়ে filter হয়)
+const toArray = (json) =>
+  Array.isArray(json) ? json : json?.products ?? json?.categories ?? json?.data ?? [];
 export async function getProducts(category) {
   try {
-    const json = await get("/products");
-    const all = Array.isArray(json) ? json : json?.products ?? json?.data ?? [];
-    return category ? all.filter((p) => p.category === category) : all;
+    if (!category) return toArray(await get("/products"));
+
+    let list = [];
+    try {
+      list = toArray(await get(`/products?category=${encodeURIComponent(category)}`));
+    } catch (e) {
+      console.error("category endpoint failed, falling back:", e.message);
+    }
+
+    if (list.length === 0) {
+      const all = toArray(await get("/products"));
+      list = all.filter((p) => p.category === category || p.categorySlug === category);
+    }
+    return list;
   } catch (e) {
     console.error("getProducts failed:", e);
     return [];
   }
 }
 
-// /products/1
 export async function getProduct(id) {
   try {
     const p = await get(`/products/${id}`);
@@ -32,40 +42,37 @@ export async function getProduct(id) {
   }
 }
 
-// /categories
 export async function getCategories() {
   try {
-    const json = await get("/categories");
-    return Array.isArray(json) ? json : [];
+    return toArray(await get("/categories"));
   } catch (e) {
     console.error("getCategories failed:", e);
     return [];
   }
 }
 
-// /categories/chal  (invalid slug হলে API 404 দেয় → null)
 export async function getCategory(slug) {
+  const list = await getCategories();
+  const found = list.find((c) => c.slug === slug || c.id === slug);
+  if (found) return found;
+
   try {
-    const c = await get(`/categories/${slug}`);
+    const c = await get(`/categories/${encodeURIComponent(slug)}`);
     return c && c.slug ? c : null;
   } catch (e) {
-    return null;
+    return null; 
   }
 }
 
 export const unitBn = { kg: "কেজি", litre: "লিটার", dozen: "ডজন", piece: "পিস" };
 
-// ১,৮৫০
 export const fmt = (n) => Number(n ?? 0).toLocaleString("bn-BD");
 
-// ২.১ / ১২.৫ / ০.০  (negative হলে abs করে)
 export const fmtPct = (n) =>
   Math.abs(Number(n ?? 0)).toLocaleString("bn-BD", {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   });
-
-// ৬৩ বা ৬৩.৫০ (fraction থাকলে ২ decimal)
 export const fmtAvg = (n) => {
   const v = Number(n ?? 0);
   return v.toLocaleString("bn-BD", {
@@ -73,8 +80,6 @@ export const fmtAvg = (n) => {
     maximumFractionDigits: 2,
   });
 };
-
-// আজকের বাংলা তারিখ (banner এ hardcode না করে এটা ব্যবহার করো)
 export const bnDate = () =>
   new Intl.DateTimeFormat("bn-BD", {
     weekday: "long",

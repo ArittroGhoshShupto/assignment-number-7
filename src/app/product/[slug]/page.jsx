@@ -1,13 +1,19 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import Shell from "../../../components/Shell";
+import { auth } from "../../../lib/auth";
 import { getProduct, unitBn, fmt, fmtPct, fmtAvg } from "../../../lib/getproducts";
 
-// Next.js 16 dev "Insight" fix: ei route instant navigation chhara render hobe
 export const instant = false;
+const SIGNIN_PATH = "/signin";
 
 export default async function ProductPage({ params }) {
-  const { slug } = await params; // /product/1 → "1"
+  const { slug } = await params; 
+  
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect(`${SIGNIN_PATH}?redirected=1&next=/product/${slug}`);
+
   const p = await getProduct(slug);
   if (!p) notFound();
 
@@ -41,7 +47,6 @@ export default async function ProductPage({ params }) {
   return (
     <Shell>
       <div className="mx-auto max-w-[1000px] space-y-6">
-        {/* Breadcrumb */}
         <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <Link href="/" className="hover:text-emerald-600">হোম</Link>
           <span>›</span>
@@ -52,7 +57,6 @@ export default async function ProductPage({ params }) {
           <span className="text-gray-700">{p.nameBn}</span>
         </div>
 
-        {/* Header */}
         <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-4xl">
@@ -91,7 +95,6 @@ export default async function ProductPage({ params }) {
           </div>
         </div>
 
-        {/* Summary */}
         <div className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-lg font-bold">দামের সারসংক্ষেপ</h2>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -123,7 +126,6 @@ export default async function ProductPage({ params }) {
           </div>
         </div>
 
-        {/* Market table */}
         <div className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-lg font-bold">বাজারভিত্তিক আজকের দাম</h2>
           <div className="overflow-x-auto">

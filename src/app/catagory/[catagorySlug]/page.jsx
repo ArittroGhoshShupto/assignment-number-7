@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Shell from "../../../components/Shell";
-import CategoryView from "../../../components/CategoryView";
+import CategoryView from "../../../components/catagoryview";
 import { getCategory, getProducts, fmt } from "../../../lib/getproducts";
 
 export default async function CategoryProducts({ params }) {
-  const { categorySlug } = await params;
+  
+  const p = await params;
+  const categorySlug = Object.values(p ?? {})[0];
+
+  if (!categorySlug) notFound();
 
   const [currentCategory, categoryProducts] = await Promise.all([
     getCategory(categorySlug),
