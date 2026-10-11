@@ -7,7 +7,11 @@ export default function Products({ products }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {list.map((item) => (
-        <Link key={item.id} href={`/product/${item.id}`}>
+        <Link
+          key={item.id}
+          href={`/product/${item.id}`}
+          className="block h-full"
+        >
           <ProductCard product={item} />
         </Link>
       ))}

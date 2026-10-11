@@ -5,8 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { ChevronDown, User, Settings, LogOut } from "lucide-react";
 import logoIcon from "../logo-icon.png";
 import { authClient } from "../lib/auth-client";
+
+const CATEGORY_BASE = "/category";
 
 export default function Navbar({ categories = [], date }) {
   const pathname = usePathname();
@@ -35,11 +38,10 @@ export default function Navbar({ categories = [], date }) {
   const user = session?.user;
 
   return (
-    <header className="w-full bg-white shadow-sm border-b border-gray-100 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-    
+    <header className="w-full border-b border-gray-100 bg-white font-sans shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
-          <div className="bg-[#10B981] w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shadow-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#10B981] p-1.5 shadow-sm">
             <Image
               src={logoIcon}
               alt="বাজার দর"
@@ -49,12 +51,13 @@ export default function Navbar({ categories = [], date }) {
             />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 leading-tight">বাজার দর</h1>
-            <p className="text-xs text-gray-500 mt-0.5">{date}</p>
+            <h1 className="text-xl font-bold leading-tight text-gray-900">
+              বাজার দর
+            </h1>
+            <p className="mt-0.5 text-xs text-gray-500">{date}</p>
           </div>
         </Link>
 
-        
         <div className="flex items-center gap-3">
           {isPending ? (
             <div className="h-9 w-24 animate-pulse rounded-lg bg-gray-200" />
@@ -62,10 +65,11 @@ export default function Navbar({ categories = [], date }) {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setOpen((o) => !o)}
-                className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-gray-50 cursor-pointer"
+                aria-haspopup="menu"
+                aria-expanded={open}
+                className="flex cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 hover:bg-gray-50"
               >
                 {user.image ? (
-                  
                   <img
                     src={user.image}
                     alt={user.name}
@@ -74,34 +78,64 @@ export default function Navbar({ categories = [], date }) {
                   />
                 ) : (
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#10B981] text-sm font-bold text-white">
-                    {user.name?.charAt(0) || "U"}
+                    {user.name?.charAt(0)?.toUpperCase() || "U"}
                   </span>
                 )}
-                <span className="hidden text-sm font-medium text-gray-800 sm:inline">
+                <span className="hidden max-w-[140px] truncate text-sm font-medium text-gray-800 sm:inline">
                   {user.name}
                 </span>
-                <span className="text-xs text-gray-500">▾</span>
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-500 transition-transform ${
+                    open ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {open && (
-                <div className="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-gray-100 bg-white p-2 shadow-lg">
-                  <div className="border-b border-gray-100 px-3 py-2">
-                    <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                <div
+                  role="menu"
+                  className="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
+                >
+                  <div className="border-b border-gray-100 px-4 py-3">
+                    <p className="truncate text-sm font-semibold text-gray-900">
+                      {user.name}
+                    </p>
                     <p className="truncate text-xs text-gray-500">{user.email}</p>
                   </div>
-                  <Link
-                    href="/profile"
-                    onClick={() => setOpen(false)}
-                    className="mt-1 block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    👤আমার প্রোফাইল
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 cursor-pointer"
-                  >
-                    🔚সাইন আউট
-                  </button>
+
+                  <div className="p-1.5">
+                    <Link
+                      href="/profile"
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <User size={18} className="text-[#10B981]" />
+                      আমার প্রোফাইল
+                    </Link>
+
+                    <Link
+                      href="/profile/update"
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Settings size={18} className="text-[#10B981]" />
+                      তথ্য আপডেট করুন
+                    </Link>
+                  </div>
+
+                  <div className="border-t border-gray-100 p-1.5">
+                    <button
+                      onClick={handleSignOut}
+                      role="menuitem"
+                      className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut size={18} />
+                      সাইন আউট
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -109,13 +143,13 @@ export default function Navbar({ categories = [], date }) {
             <>
               <Link
                 href="/signin"
-                className="text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors px-2 py-1"
+                className="px-2 py-1 text-sm font-medium text-gray-700 transition-colors hover:text-emerald-600"
               >
                 সাইন ইন
               </Link>
               <Link
                 href="/signup"
-                className="bg-[#10B981] hover:bg-[#0D9668] text-white text-sm font-medium px-5 py-2 rounded-xl transition-colors shadow-sm"
+                className="rounded-xl bg-[#10B981] px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#0D9668]"
               >
                 সাইন আপ
               </Link>
@@ -124,15 +158,16 @@ export default function Navbar({ categories = [], date }) {
         </div>
       </div>
 
-      <div className="border-t border-b border-gray-100 py-3 bg-white">
-        <div className="max-w-7xl mx-auto px-4 flex items-center sm:justify-center gap-2 sm:gap-4 overflow-x-auto scrollbar-none">
+      <div className="border-b border-t border-gray-100 bg-white py-3">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:justify-center sm:gap-4 [&::-webkit-scrollbar]:hidden">
           {categories.map((item) => {
-            const href = `/catagory/${item.slug}`;
+            const href = `${CATEGORY_BASE}/${item.slug}`;
             const active = pathname === href;
             return (
               <Link
                 key={item.id ?? item.slug}
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   active
                     ? "bg-[#10B981] text-white"
