@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
-// dev-e hot reload-e bar bar notun connection na khulte
+
 const client =
   globalThis._mongoClient ??
   (globalThis._mongoClient = new MongoClient(process.env.BETTER_AUTH_MONGODB_URI));
@@ -27,7 +27,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
-    autoSignIn: false, // sign up-er por /signin e jabe (spec onujayi)
+    autoSignIn: false, 
   },
   socialProviders,
   database: mongodbAdapter(db, { client }),
