@@ -41,7 +41,7 @@ export default async function Home() {
           <Products products={fallers} />
         </section>
 
-        <section id="সব-পণ্য" className="space-y-4 border-t border-gray-200 pt-4">
+        <section id="সব-পণ্য" className="scroll-mt-6 space-y-4 border-t border-gray-200 pt-4">
           <div>
             <h2 className="text-xl font-bold text-gray-900">সব পণ্য</h2>
             <p className="text-xs text-gray-500">
