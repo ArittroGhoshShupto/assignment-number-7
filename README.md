@@ -4,7 +4,7 @@
 
 ## 🚀 প্রযুক্তিসমূহ (Technologies Used)
 - **Framework**: Next.js 15 (App Router - JavaScript)
-- **Styling**: Tailwind CSS + DaisyUI
+- **Styling**: Tailwind CSS + HeroUI
 - **Authentication**: BetterAuth (Email/Password, Google & GitHub)
 - **Toast Notification**: React Hot Toast
 
